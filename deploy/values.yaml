@@ -75,7 +75,7 @@ externalSecrets:
               client_id: warpgate
               client_secret: "{{ .clientSecret }}"
               issuer_url: https://auth.clockmost.com/application/o/warpgate/
-              scopes: [openid, email, profile]
+              scopes: [openid, profile, warpgate_email]
               admin_roles_claim: groups
               admin_role_mappings:
                 warpgate-admins: warpgate:admin
