@@ -54,10 +54,12 @@ externalSecrets:
         ssh:
           enable: true
           listen: "0.0.0.0:2222"
+          external_port: 30222
           host_key_verification: auto_reject
           inactivity_timeout: 30m
         http:
           listen: "0.0.0.0:8888"
+          external_port: 443
           certificate: /var/run/meru/tls/tls.crt
           key: /var/run/meru/tls/tls.key
           trust_x_forwarded_headers: true
