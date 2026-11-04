@@ -63,9 +63,6 @@ externalSecrets:
           certificate: /var/run/meru/tls/tls.crt
           key: /var/run/meru/tls/tls.key
           trust_x_forwarded_headers: true
-        recordings:
-          enable: true
-          path: /data/recordings
         sso_providers:
           - name: authentik
             label: Authentik
