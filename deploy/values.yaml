@@ -7,8 +7,8 @@ name: warpgate
 owner: mario
 image:
   repository: zot.clockmost.com/meru/warpgate
-  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
-  tag: ""
+  digest: sha256:9ade5de2b16da00c690c5538315f1a5889f0bfd4f7d2cce2cab9fee25afc5ec5
+  tag: "87fae1578b65"
 
 # Warpgate serves only HTTPS, with the certificate below. Its data (SQLite, SSH keys, recordings) is on one volume.
 port: 8888
