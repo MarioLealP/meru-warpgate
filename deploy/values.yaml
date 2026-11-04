@@ -9,3 +9,68 @@ image:
   repository: zot.clockmost.com/meru/warpgate
   digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
   tag: ""
+
+# Warpgate serves only HTTPS, with the certificate below. Its data (SQLite, SSH keys, recordings) is on one volume.
+port: 8888
+extraPorts:
+  - name: ssh
+    port: 2222
+    nodePort: 30222
+heartbeat:
+  path: /@warpgate/api/info
+  scheme: HTTPS
+args: [--config, /etc/warpgate/warpgate.yaml, --skip-securing-files, run]
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+certificate:
+  enabled: true
+# A restart would cut open sessions. Warpgate restarts only its HTTP listener when the certificate files change.
+reloadsSecrets: true
+persistence:
+  - name: data
+    mountPath: /data
+    size: 10Gi
+    storageClass: local
+networkPolicy:
+  enabled: true
+
+# The whole config, because Warpgate can't read its client secret from anywhere else. clientSecret is at
+# apps/meru/warpgate/eso/warpgate-config, copied from Authentik by the admin script meru-oidc-secret.sh.
+# Ticket rules and targets live in Warpgate's database, not here.
+externalSecrets:
+  warpgate-config:
+    mountPath: /etc/warpgate
+    files:
+      warpgate.yaml: |
+        database_url: "sqlite:/data/db"
+        external_host: warpgate.clockmost.com
+        ssh:
+          enable: true
+          listen: "0.0.0.0:2222"
+          host_key_verification: auto_reject
+          inactivity_timeout: 30m
+        http:
+          listen: "0.0.0.0:8888"
+          certificate: /var/run/meru/tls/tls.crt
+          key: /var/run/meru/tls/tls.key
+          trust_x_forwarded_headers: true
+        recordings:
+          enable: true
+          path: /data/recordings
+        sso_providers:
+          - name: authentik
+            label: Authentik
+            auto_create_users: true
+            provider:
+              type: custom
+              client_id: warpgate
+              client_secret: "{{ .clientSecret }}"
+              issuer_url: https://auth.clockmost.com/application/o/warpgate/
+              scopes: [openid, email, profile]
+              admin_roles_claim: groups
+              admin_role_mappings:
+                warpgate-admins: warpgate:admin
