@@ -39,10 +39,16 @@ networkPolicy:
   enabled: true
   # NodePort traffic is checked here with the client's address, and this is the only gate on it: firewalld lets
   # anything Kubernetes redirected pass. So the LAN is listed, and the IoT network isn't.
-  hostAddresses: [10.42.0.1/32, 172.16.0.0/12, 192.168.10.0/24]
+  hostAddresses: [10.42.0.1/32, 192.168.10.0/24]
   # The agents pod (workspace runbooks/clockmost-agents-pod.md D4): its agents reach Bahamut only through here - the
   # read-only door as claude-read, root by stamped slip. It dials the node port; the policy sees its pod address.
   fromNamespaces: [agents]
+  # Out: SSH to its targets on the LAN (Bahamut, the R7000, ...) and Caddy for Authentik's sign-in. A target on
+  # another port or outside the LAN needs its own entry here.
+  egress: none
+  toAddresses:
+    - { cidr: 192.168.10.0/24, ports: [22] }
+    - { cidr: 192.168.10.110/32, ports: [443] }
 
 # The whole config, because Warpgate can't read its client secret from anywhere else. clientSecret is at
 # apps/meru/warpgate/eso/warpgate-config, copied from Authentik by the admin script meru-oidc-secret.sh.
